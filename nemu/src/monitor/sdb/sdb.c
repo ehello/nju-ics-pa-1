@@ -23,7 +23,7 @@ static char* rl_gets() {
 
   line_read = readline("(nemu) ");
 
-  // if string 'line_read' is not empty, store it
+  // if string 'line_read' is not empty, store it.
   if (line_read && *line_read) {
     add_history(line_read);
   }
