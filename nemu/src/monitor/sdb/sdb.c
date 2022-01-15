@@ -34,6 +34,9 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
+  // the state of NEMU should be changed to NEMU_QUIT
+  // while command 'q' is executed
+  nemu_state.state = NEMU_QUIT;
   return -1;
 }
 
