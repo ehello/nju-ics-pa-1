@@ -44,6 +44,24 @@ static int cmd_q(char *args) {
   return -1;
 }
 
+static int cmd_si(char *args) {
+    // TODO: si [N] - run [N] instructions
+    char *arg = strtok(NULL, " ");
+    int step = 0;
+    if (arg == NULL) {
+        step = 1;
+    } else {
+        sscanf(arg, "%d", &step);
+        if (step < 0) {
+            printf("Please input a positive integer.\n");
+            return 0;
+        }
+    }
+
+    cpu_exec(step);
+    return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -54,6 +72,7 @@ static struct {
   { "help", "Display informations about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
+  { "si", "Run [N] instructions", cmd_si},
 
   /* TODO: Add more commands */
 
