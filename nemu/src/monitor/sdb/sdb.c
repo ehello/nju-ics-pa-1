@@ -70,9 +70,17 @@ static int cmd_info(char *args)
         printf("Please input [r] for registers or [w] for watchpoints.\n");
         return 0;
     }
-    if (*arg == 'r') {
+
+    switch (*arg)
+    {
+    case 'r':
         // isa_reg_display() is in ./src/isa/#YOUR_ISA/reg.c
         isa_reg_display();
+        break;
+    
+    default:
+        printf("Please input [r] for registers or [w] for watchpoints.\n");
+        break;
     }
     return 0;
 }
