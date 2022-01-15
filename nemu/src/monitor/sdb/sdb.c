@@ -44,7 +44,8 @@ static int cmd_q(char *args) {
   return -1;
 }
 
-static int cmd_si(char *args) {
+static int cmd_si(char *args)
+{
     // TODO: si [N] - run [N] instructions
     char *arg = strtok(NULL, " ");
     int step = 0;
@@ -62,6 +63,20 @@ static int cmd_si(char *args) {
     return 0;
 }
 
+static int cmd_info(char *args)
+{
+    char *arg = strtok(args, " ");
+    if (arg == NULL) {
+        printf("Please input [r] for registers or [w] for watchpoints.\n");
+        return 0;
+    }
+    if (*arg == 'r') {
+        // isa_reg_display() is in ./src/isa/#YOUR_ISA/reg.c
+        isa_reg_display();
+    }
+    return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -73,8 +88,9 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
   { "si", "Run [N] instructions", cmd_si},
+  { "info", "Print the information of [r]egiters or [w]atchpoints", cmd_info},
 
-  /* TODO: Add more commands */
+  // TODO: Add more commands
 
 };
 
