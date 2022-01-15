@@ -13,6 +13,9 @@ void init_wp_pool();
 static char* rl_gets() {
   static char *line_read = NULL;
 
+  // readline() will allocate the memory space of 
+  // the read string via malloc(), so first check
+  // if 'line_read' is allocated.
   if (line_read) {
     free(line_read);
     line_read = NULL;
@@ -20,6 +23,7 @@ static char* rl_gets() {
 
   line_read = readline("(nemu) ");
 
+  // if string 'line_read' is not empty, store it
   if (line_read && *line_read) {
     add_history(line_read);
   }
@@ -35,7 +39,7 @@ static int cmd_c(char *args) {
 
 static int cmd_q(char *args) {
   // the state of NEMU should be changed to NEMU_QUIT
-  // while command 'q' is executed
+  // while command 'q' is executed.
   nemu_state.state = NEMU_QUIT;
   return -1;
 }
@@ -112,7 +116,9 @@ void sdb_mainloop() {
 
     int i;
     for (i = 0; i < NR_CMD; i ++) {
+      // find the command matches to string 'cmd'
       if (strcmp(cmd, cmd_table[i].name) == 0) {
+        // execute the command
         if (cmd_table[i].handler(args) < 0) { return; }
         break;
       }
