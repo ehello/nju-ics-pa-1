@@ -1,4 +1,6 @@
 #include <isa.h>
+#include <sys/types.h>
+#include <regex.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
@@ -6,7 +8,10 @@
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
+  TK_NOTYPE = 256, 
+  TK_EQ,
+  TK_DEC,
+  TK_HEX,
 
   /* TODO: Add more token types */
 
@@ -23,6 +28,9 @@ static struct rule {
 
   {" +", TK_NOTYPE},    // spaces
   {"\\+", '+'},         // plus
+  {"-", '-'},           // minus
+  {"\\*", '*'},         // multiple
+  {"/", '/'},           // divide
   {"==", TK_EQ},        // equal
 };
 
