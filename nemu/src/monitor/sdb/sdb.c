@@ -115,13 +115,12 @@ static int cmd_x(char *args)
 
 static int cmd_p(char *args)
 {
-  char *e = strtok(NULL, " ");
   bool success;
-  if (e == NULL) {
+  if (args == NULL) {
     printf("Please input [EXPR] to evaluate its value.\n");
     return 0;
   }
-  expr(e, &success);
+  expr(args, &success);
   if (success == false) {
     printf("Illegal expression, please retry.\n");
   }
