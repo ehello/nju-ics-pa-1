@@ -47,71 +47,85 @@ static int cmd_q(char *args) {
 
 static int cmd_si(char *args)
 {
-    char *arg = strtok(NULL, " ");
-    int step = 0;
-    if (arg == NULL) {
-        step = 1;
-    } else {
-        sscanf(arg, "%d", &step);
-        if (step < 0) {
-            printf("Please input a positive integer.\n");
-            return 0;
-        }
-    }
-
-    cpu_exec(step);
-    return 0;
+  char *arg = strtok(NULL, " ");
+  int step = 0;
+  if (arg == NULL) {
+      step = 1;
+  } else {
+      sscanf(arg, "%d", &step);
+      if (step < 0) {
+          printf("Please input a positive integer.\n");
+          return 0;
+      }
+  }
+   cpu_exec(step);
+  return 0;
 }
 
 static int cmd_info(char *args)
 {
-    char *arg = strtok(args, " ");
-    if (arg == NULL) {
-        printf("Please input [r] for registers or [w] for watchpoints.\n");
-        return 0;
-    }
+  char *arg = strtok(args, " ");
+  if (arg == NULL) {
+      printf("Please input [r] for registers or [w] for watchpoints.\n");
+      return 0;
+  }
 
-    switch (*arg)
-    {
-    case 'r':
-        // isa_reg_display() is in ./src/isa/#YOUR_ISA/reg.c
-        isa_reg_display();
-        break;
-    
-    default:
-        printf("Please input [r] for registers or [w] for watchpoints.\n");
-        break;
-    }
-    return 0;
+  switch (*arg)
+  {
+  case 'r':
+    // isa_reg_display() is in ./src/isa/#YOUR_ISA/reg.c
+    isa_reg_display();
+    break;
+  
+  default:
+    printf("Please input [r] for registers or [w] for watchpoints.\n");
+    break;
+  }
+  return 0;
 }
 
 static int cmd_x(char *args)
 {
-    char *arg[2];
-    arg[0] = strtok(NULL, " ");
-    arg[1] = strtok(NULL, " ");
-    if (arg[0] == NULL) {
-        printf("Please input [N] for the number of words.\n");
-        return 0;
-    } else if (arg[1] == NULL) {
-        printf("Please input [EXPR] for the beginning address.\n");
-        return 0;
-    }
-
-    uint32_t N, vaddr;
-
-    N = atoi(arg[0]);
-    sscanf(arg[1], "%x", &vaddr);
-    // vaddr = get_expr_value(arg[1]);
-
-    while (N > 0) {
-        printf("0x%08x: ", vaddr);
-        for (int i = 4; i > 0 && N > 0; i--, N--, vaddr += 4) {
-            printf("%08x ", vaddr_read(vaddr, 4));
-        }
-        putchar('\n');
-    }
+  char *arg[2];
+  arg[0] = strtok(NULL, " ");
+  arg[1] = strtok(NULL, " ");
+  if (arg[0] == NULL) {
+    printf("Please input [N] for the number of words.\n");
     return 0;
+  } else if (arg[1] == NULL) {
+    printf("Please input [EXPR] for the beginning address.\n");
+    return 0;
+  }
+
+  uint32_t N, vaddr;
+
+  N = atoi(arg[0]);
+  sscanf(arg[1], "%x", &vaddr);
+  // vaddr = get_expr_value(arg[1]);
+
+  while (N > 0) {
+    printf("0x%08x: ", vaddr);
+    for (int i = 4; i > 0 && N > 0; i--, N--, vaddr += 4) {
+      printf("%08x ", vaddr_read(vaddr, 4));
+    }
+      putchar('\n');
+  }
+  return 0;
+}
+
+static int cmd_p(char *args)
+{
+  char *e = strtok(NULL, " ");
+  bool success;
+  if (e == NULL) {
+    printf("Please input [EXPR] to evaluate its value.\n");
+    return 0;
+  }
+  expr(e, &success);
+  if (success == false) {
+    printf("Illegal expression, please retry.\n");
+  }
+  return 0;
 }
 
 static int cmd_help(char *args);
@@ -127,6 +141,7 @@ static struct {
   { "si", "Run [N] instructions", cmd_si },
   { "info", "Print the information of [r]egiters or [w]atchpoints", cmd_info },
   { "x", "Scan the memory for [N] words begins with the value of [EXPR]", cmd_x },
+  { "p", "Print the value of [EXPR]", cmd_p},
 
   // TODO: Add more commands
 

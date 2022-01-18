@@ -1,6 +1,4 @@
 #include <isa.h>
-#include <sys/types.h>
-#include <regex.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
@@ -26,12 +24,16 @@ static struct rule {
    * Pay attention to the precedence level of different rules.
    */
 
-  {" +", TK_NOTYPE},    // spaces
-  {"\\+", '+'},         // plus
-  {"-", '-'},           // minus
-  {"\\*", '*'},         // multiple
-  {"/", '/'},           // divide
-  {"==", TK_EQ},        // equal
+//   {"[\\+-]?[[:digit:]]+", TK_DEC},  // decimal number
+  {"[[:digit:]]+", TK_DEC},         // decimal number
+  {" +", TK_NOTYPE},                // spaces
+  {"\\(", '('},                     // left parenthese
+  {"\\)", ')'},                     // right parenthese
+  {"\\+", '+'},                     // plus
+  {"-", '-'},                       // minus
+  {"\\*", '*'},                     // multiple
+  {"/", '/'},                       // divide
+  {"==", TK_EQ},                    // equal
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -88,7 +90,16 @@ static bool make_token(char *e) {
          */
 
         switch (rules[i].token_type) {
-          default: TODO();
+        case TK_DEC:
+          memcpy(tokens[nr_token].str, substr_start, substr_len);
+        case '+': case '-': case '*': case '/':
+        case '(': case ')':
+          tokens[nr_token].type = rules[i].token_type;
+          nr_token++;
+          break;
+        case TK_NOTYPE:
+          break;
+        default: TODO();
         }
 
         break;
