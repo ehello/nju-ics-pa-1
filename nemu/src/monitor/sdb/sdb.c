@@ -98,10 +98,11 @@ static int cmd_x(char *args)
   }
 
   uint32_t N, vaddr;
+  bool success;
 
   N = atoi(arg[0]);
-  sscanf(arg[1], "%x", &vaddr);
-  // vaddr = get_expr_value(arg[1]);
+  // sscanf(arg[1], "%x", &vaddr);
+  vaddr = expr(arg[1], &success);
 
   while (N > 0) {
     printf("0x%08x: ", vaddr);
@@ -124,7 +125,7 @@ static int cmd_p(char *args)
   if (success == false) {
     printf("Illegal expression, please retry.\n");
   } else {
-    printf("%d\n", val);
+    printf("%u\n", val);
   }
   return 0;
 }

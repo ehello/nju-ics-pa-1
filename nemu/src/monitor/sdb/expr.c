@@ -25,6 +25,7 @@ static struct rule {
    */
 
 //   {"[\\+-]?[[:digit:]]+", TK_DEC},  // decimal number
+  {"0x[[:digit:]a-fA-F]+", TK_HEX}, // hexadecimal number
   {"[[:digit:]]+", TK_DEC},         // decimal number
   {" +", TK_NOTYPE},                // spaces
   {"\\(", '('},                     // left parenthese
@@ -90,9 +91,10 @@ static bool make_token(char *e) {
          */
 
         switch (rules[i].token_type) {
-        case TK_DEC:
+        case TK_DEC: case TK_HEX:
           if (substr_len > 31) {
             // token is too long.
+            return false;
             break;
           }
           memcpy(tokens[nr_token].str, substr_start, substr_len);
@@ -157,9 +159,15 @@ static word_t eval(int begin, int end, bool *success)
     *success = false;
     return 0;
   } else if (begin == end) {
+    uint32_t ret;
     switch (tokens[begin].type) {
     case TK_DEC:
-      return atoi(tokens[begin].str);
+      ret = atoi(tokens[begin].str);
+      return ret;
+      break;
+    case TK_HEX:
+      sscanf(tokens[begin].str, "%x", &ret);
+      return ret;
       break;
     default:
       *success = false;
