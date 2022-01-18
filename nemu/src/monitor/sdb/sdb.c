@@ -120,9 +120,11 @@ static int cmd_p(char *args)
     printf("Please input [EXPR] to evaluate its value.\n");
     return 0;
   }
-  expr(args, &success);
+  int val = expr(args, &success);
   if (success == false) {
     printf("Illegal expression, please retry.\n");
+  } else {
+    printf("%d\n", val);
   }
   return 0;
 }

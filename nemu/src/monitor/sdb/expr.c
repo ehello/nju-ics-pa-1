@@ -91,7 +91,12 @@ static bool make_token(char *e) {
 
         switch (rules[i].token_type) {
         case TK_DEC:
+          if (substr_len > 31) {
+            // token is too long.
+            break;
+          }
           memcpy(tokens[nr_token].str, substr_start, substr_len);
+          tokens[nr_token].str[substr_len] = '\0';
         case '+': case '-': case '*': case '/':
         case '(': case ')':
           tokens[nr_token].type = rules[i].token_type;
@@ -115,6 +120,96 @@ static bool make_token(char *e) {
   return true;
 }
 
+// check if the sub-expression is wrapped by a pair of parentheses
+static bool check_parentheses(int begin, int end)
+{
+  if (tokens[begin].type != '(' || tokens[end].type != ')') {
+    return false;
+  }
+
+  // check the remaining parentheses, use an integer 'match'
+  // to simulate a stack
+  int match = 0;
+  for (begin = begin + 1; begin < end; begin++) {
+    if (match < 0) {
+      return false;
+    }
+    if (tokens[begin].type == '(') {
+      match++;
+    } else if (tokens[begin].type == ')') {
+      match--;
+    }
+  }
+  if (match == 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// calculate the value of tokens begin with 'begin' and end with 'end'
+static word_t eval(int begin, int end, bool *success)
+{
+  if (*success == false) {
+    return 0;
+  }
+  if (begin > end) {
+    *success = false;
+    return 0;
+  } else if (begin == end) {
+    switch (tokens[begin].type) {
+    case TK_DEC:
+      return atoi(tokens[begin].str);
+      break;
+    default:
+      *success = false;
+      return 0;
+    }
+  } else if (check_parentheses(begin, end)) {
+    return eval(begin + 1, end - 1, success);
+  } else {
+    // find the main operator
+    int op = 0, type = 0, match = 0;
+    for (int i = begin; i <= end; i++) {
+      if (match < 0) {
+        *success = false;
+        return 0;
+      }
+      switch (tokens[i].type) {
+      case '(':
+        match++;
+        break;
+      case ')':
+        match--;
+        break;
+      case '+': case '-': case '*': case '/':
+        if (match == 0 && (((type == 0 || type == '*' || type == '/') && (tokens[i].type == '+' || tokens[i].type == '-')) || 
+                           ((type == 0)                               && (tokens[i].type == '*' || tokens[i].type == '/')))) {
+          type = tokens[i].type;
+          op = i;
+        }
+        break;
+      default:
+        break;
+      }
+    }
+    if (type == 0) {
+      *success = false;
+      return 0;
+    }
+
+    int rval = eval(begin, op - 1, success);
+    int lval = eval(op + 1, end, success);
+
+    switch (type) {
+      case '+': return rval + lval;
+      case '-': return rval - lval;
+      case '*': return rval * lval;
+      case '/': return rval / lval;
+      default: assert(0);
+    }
+  }
+}
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
@@ -123,8 +218,9 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-  // TODO();
 
+  // Initialize '*success' to true, if there is something wrong
+  // in eval, it will be set to false.
   *success = true;
-  return 0;
+  return eval(0, nr_token - 1, success);
 }
