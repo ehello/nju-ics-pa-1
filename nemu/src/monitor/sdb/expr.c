@@ -1,4 +1,5 @@
 #include <isa.h>
+#include <memory/vaddr.h>
 
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
@@ -28,7 +29,7 @@ static struct rule {
 
   {"0x[[:digit:]a-fA-F]+", TK_HEX}, // hexadecimal number
   {"[[:digit:]]+", TK_DEC},         // decimal number
-  {"\\$.+", TK_REG},                // register
+  {"\\$[^ ]*", TK_REG},             // register
   {" +", TK_NOTYPE},                // spaces
   {"\\(", '('},                     // left parenthese
   {"\\)", ')'},                     // right parenthese
@@ -121,6 +122,13 @@ static bool make_token(char *e) {
     }
   }
 
+  // scan the tokens to find dereference operators
+  for (int i = 0; i < nr_token; i++) {
+    if (tokens[i].type == '*' && (i == 0 || (tokens[i - 1].type != TK_DEC && tokens[i - 1].type != TK_HEX && tokens[i - 1].type != TK_REG))) {
+      tokens[i].type = TK_DEREF;
+    }
+  }
+
   return true;
 }
 
@@ -197,9 +205,10 @@ static word_t eval(int begin, int end, bool *success)
       case ')':
         match--;
         break;
-      case '+': case '-': case '*': case '/':
-        if (match == 0 && (((type == 0 || type == '*' || type == '/') && (tokens[i].type == '+' || tokens[i].type == '-')) || 
-                           ((type == 0)                               && (tokens[i].type == '*' || tokens[i].type == '/')))) {
+      case '+': case '-': case '*': case '/': case TK_DEREF:
+        if (match == 0 && (((type == 0 || type == '*' || type == '/' || type == TK_DEREF) && (tokens[i].type == '+' || tokens[i].type == '-')) || 
+                           ((type == 0 || type == TK_DEREF)                               && (tokens[i].type == '*' || tokens[i].type == '/')) ||
+                           ((type == 0)                                                   && (tokens[i].type == TK_DEREF                    )))) {
           type = tokens[i].type;
           op = i;
         }
@@ -213,14 +222,18 @@ static word_t eval(int begin, int end, bool *success)
       return 0;
     }
 
-    int rval = eval(begin, op - 1, success);
-    int lval = eval(op + 1, end, success);
+    int rval, lval;
+    if (type != TK_DEREF) {
+      lval = eval(begin, op - 1, success);
+    } 
+    rval = eval(op + 1, end, success);
 
     switch (type) {
       case '+': return rval + lval;
       case '-': return rval - lval;
       case '*': return rval * lval;
       case '/': return rval / lval;
+      case TK_DEREF: return vaddr_read(rval, 4);
       default: assert(0);
     }
   }
