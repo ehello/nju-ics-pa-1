@@ -10,6 +10,8 @@ enum {
   TK_EQ,
   TK_DEC,
   TK_HEX,
+  TK_DEREF,
+  TK_REG,
 
   /* TODO: Add more token types */
 
@@ -24,15 +26,15 @@ static struct rule {
    * Pay attention to the precedence level of different rules.
    */
 
-//   {"[\\+-]?[[:digit:]]+", TK_DEC},  // decimal number
   {"0x[[:digit:]a-fA-F]+", TK_HEX}, // hexadecimal number
   {"[[:digit:]]+", TK_DEC},         // decimal number
+  {"\\$.+", TK_REG},                // register
   {" +", TK_NOTYPE},                // spaces
   {"\\(", '('},                     // left parenthese
   {"\\)", ')'},                     // right parenthese
   {"\\+", '+'},                     // plus
   {"-", '-'},                       // minus
-  {"\\*", '*'},                     // multiple
+  {"\\*", '*'},                     // multiple or dereference
   {"/", '/'},                       // divide
   {"==", TK_EQ},                    // equal
 };
@@ -91,7 +93,7 @@ static bool make_token(char *e) {
          */
 
         switch (rules[i].token_type) {
-        case TK_DEC: case TK_HEX:
+        case TK_DEC: case TK_HEX: case TK_REG:
           if (substr_len > 31) {
             // token is too long.
             return false;
@@ -150,6 +152,7 @@ static bool check_parentheses(int begin, int end)
 }
 
 // calculate the value of tokens begin with 'begin' and end with 'end'
+// priority: deref > * = / > + = -
 static word_t eval(int begin, int end, bool *success)
 {
   if (*success == false) {
@@ -167,6 +170,10 @@ static word_t eval(int begin, int end, bool *success)
       break;
     case TK_HEX:
       sscanf(tokens[begin].str, "%x", &ret);
+      return ret;
+      break;
+    case TK_REG:
+      ret = isa_reg_str2val(tokens[begin].str, success);
       return ret;
       break;
     default:
@@ -223,12 +230,13 @@ word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
     return 0;
+  } else {
+    *success = true;
   }
 
   /* TODO: Insert codes to evaluate the expression. */
 
   // Initialize '*success' to true, if there is something wrong
   // in eval, it will be set to false.
-  *success = true;
   return eval(0, nr_token - 1, success);
 }
