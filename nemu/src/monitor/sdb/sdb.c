@@ -156,6 +156,17 @@ static int cmd_w(char *args)
   return 0;
 }
 
+static int cmd_d(char *args)
+{
+  int NO = atoi(args);
+  if (del_wp(NO) == 1) {
+    printf("No such watchpoint set.\n");
+  } else {
+    printf("Successfully delete watchpoint with number %d.\n", NO);
+  }
+  return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -171,6 +182,7 @@ static struct {
   { "x", "Scan the memory for [N] words begins with the value of [EXPR]", cmd_x },
   { "p", "Print the value of [EXPR]", cmd_p},
   { "w", "Set a watchpoint with [EXPR]", cmd_w},
+  { "d", "Delete a watchpoint with number [N]", cmd_d},
 
   // TODO: Add more commands
 
