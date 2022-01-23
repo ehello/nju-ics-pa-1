@@ -58,7 +58,7 @@ static int cmd_si(char *args)
           return 0;
       }
   }
-   cpu_exec(step);
+  cpu_exec(step);
   return 0;
 }
 
@@ -75,6 +75,10 @@ static int cmd_info(char *args)
   case 'r':
     // isa_reg_display() is in ./src/isa/#YOUR_ISA/reg.c
     isa_reg_display();
+    break;
+  
+  case 'w':
+    display_wp();
     break;
   
   default:
@@ -97,7 +101,7 @@ static int cmd_x(char *args)
     return 0;
   }
 
-  uint32_t N, vaddr;
+  word_t N, vaddr;
   bool success;
 
   N = atoi(arg[0]);
@@ -130,6 +134,28 @@ static int cmd_p(char *args)
   return 0;
 }
 
+static int cmd_w(char *args)
+{
+  int add_wp_state = add_wp(args);
+  switch (add_wp_state) {
+  case 1:
+    printf("[EXPR] is too long.\n");
+    break;
+  case 2:
+    printf("There is no available watchpoint in the pool.\n");
+    break;
+  case 3:
+    printf("Illegal expression, please retry.\n");
+    break;
+  case 0:
+    printf("Successfully set a watchpoint with expression %s.\n", args);
+    break;
+  default:
+    break;
+  }
+  return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -144,6 +170,7 @@ static struct {
   { "info", "Print the information of [r]egiters or [w]atchpoints", cmd_info },
   { "x", "Scan the memory for [N] words begins with the value of [EXPR]", cmd_x },
   { "p", "Print the value of [EXPR]", cmd_p},
+  { "w", "Set a watchpoint with [EXPR]", cmd_w},
 
   // TODO: Add more commands
 

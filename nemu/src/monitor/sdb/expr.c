@@ -170,7 +170,7 @@ static word_t eval(int begin, int end, bool *success)
     *success = false;
     return 0;
   } else if (begin == end) {
-    uint32_t ret;
+    word_t ret;
     switch (tokens[begin].type) {
     case TK_DEC:
       ret = atoi(tokens[begin].str);
