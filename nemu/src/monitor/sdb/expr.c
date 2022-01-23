@@ -103,7 +103,7 @@ static bool make_token(char *e) {
           memcpy(tokens[nr_token].str, substr_start, substr_len);
           tokens[nr_token].str[substr_len] = '\0';
         case '+': case '-': case '*': case '/':
-        case '(': case ')':
+        case '(': case ')': case TK_EQ:
           tokens[nr_token].type = rules[i].token_type;
           nr_token++;
           break;
@@ -160,7 +160,7 @@ static bool check_parentheses(int begin, int end)
 }
 
 // calculate the value of tokens begin with 'begin' and end with 'end'
-// priority: deref > * = / > + = -
+// priority: deref '>' * '=' / '>' + '=' - '>' ==
 static word_t eval(int begin, int end, bool *success)
 {
   if (*success == false) {
@@ -205,10 +205,11 @@ static word_t eval(int begin, int end, bool *success)
       case ')':
         match--;
         break;
-      case '+': case '-': case '*': case '/': case TK_DEREF:
-        if (match == 0 && (((type == 0 || type == '*' || type == '/' || type == TK_DEREF) && (tokens[i].type == '+' || tokens[i].type == '-')) || 
-                           ((type == 0 || type == TK_DEREF)                               && (tokens[i].type == '*' || tokens[i].type == '/')) ||
-                           ((type == 0)                                                   && (tokens[i].type == TK_DEREF                    )))) {
+      case '+': case '-': case '*': case '/': case TK_DEREF: case TK_EQ:
+        if (match == 0 && (((type == 0 || type == '*' || type == '/' || type == TK_DEREF || type == '+' || type == '-') && (tokens[i].type == TK_EQ                       )) ||
+                           ((type == 0 || type == '*' || type == '/' || type == TK_DEREF)                               && (tokens[i].type == '+' || tokens[i].type == '-')) || 
+                           ((type == 0 || type == TK_DEREF)                                                             && (tokens[i].type == '*' || tokens[i].type == '/')) ||
+                           ((type == 0)                                                                                 && (tokens[i].type == TK_DEREF                    )))) {
           type = tokens[i].type;
           op = i;
         }
@@ -234,6 +235,7 @@ static word_t eval(int begin, int end, bool *success)
       case '*': return rval * lval;
       case '/': return rval / lval;
       case TK_DEREF: return vaddr_read(rval, 4);
+      case TK_EQ: return rval == lval;
       default: assert(0);
     }
   }
