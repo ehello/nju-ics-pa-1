@@ -89,13 +89,13 @@ int add_wp(char* e)
   return 0;
 }
 
-bool check_wp()
+bool check_wp(word_t pc)
 {
   bool success = true, change = false;
   for (WP *wp = head; wp != NULL; wp = wp->next) {
     word_t val = expr(wp->e, &success);
     if (val != wp->old_val) {
-      printf("Change of watchpoint %d is detected.\n", wp->NO);
+      printf("Hit watchpoint %d at 0x%08x.\n", wp->NO, pc);
       wp->old_val = val;
       change = true;
     }
@@ -109,8 +109,9 @@ void display_wp()
     printf("There is no watchpoint set.\n");
     return;
   }
+  printf("%8s\t%8s\n", "NO", "EXPR");
   for (WP *wp = head; wp != NULL; wp = wp->next) {
-    printf("%d\t%s\n", wp->NO, wp->e);
+    printf("%8d\t%8s\n", wp->NO, wp->e);
   }
   return;
 }
