@@ -74,18 +74,21 @@ int add_wp(char* e)
 {
   WP *wp;
   bool success = true;
+  word_t old_val;
   if (strlen(e) > 127) {
     return 1;
   }
+
+  old_val = expr(e, &success);
+  if (success == false) {
+    return 3;
+  }
+
   if ((wp = alloc_wp()) == NULL) {
     return 2;
   }
   strcpy(wp->e, e);
-  wp->old_val = expr(e, &success);
-  if (success == false) {
-    del_wp(wp->NO);
-    return 3;
-  }
+  wp->old_val = old_val;
   return 0;
 }
 
