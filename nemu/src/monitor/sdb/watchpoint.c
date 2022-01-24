@@ -1,5 +1,6 @@
 #include "sdb.h"
 #include <string.h>
+#include <stdlib.h>
 
 #define NR_WP 32
 
@@ -8,7 +9,7 @@ typedef struct watchpoint {
   struct watchpoint *next;
 
   /* TODO: Add more members if necessary */
-  char e[128];
+  char *e;
   word_t old_val; 
 
 } WP;
@@ -44,6 +45,7 @@ static inline void free_wp(WP *wp)
   if (wp == NULL) {
     return;
   }
+  free(wp->e);
   wp->next = free_;
   free_ = wp;
 }
@@ -65,7 +67,6 @@ int del_wp(int wp_no)
   } else {
     pre->next = wp->next;
   }
-  wp->e[0] = '\0';
   free_wp(wp);
   return 0;
 }
@@ -75,9 +76,9 @@ int add_wp(char* e)
   WP *wp;
   bool success = true;
   word_t old_val;
-  if (strlen(e) > 127) {
-    return 1;
-  }
+  // if (strlen(e) > 127) {
+  //   return 1;
+  // }
 
   old_val = expr(e, &success);
   if (success == false) {
@@ -87,7 +88,7 @@ int add_wp(char* e)
   if ((wp = alloc_wp()) == NULL) {
     return 2;
   }
-  strcpy(wp->e, e);
+  wp->e = strdup(e);
   wp->old_val = old_val;
   return 0;
 }
