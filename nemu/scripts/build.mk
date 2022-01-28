@@ -26,6 +26,7 @@ CFLAGS  := -O2 -MMD -Wall -Werror $(INCLUDES) $(CFLAGS)
 LDFLAGS := -O2 $(LDFLAGS)
 
 OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) $(CXXSRC:%.cc=$(OBJ_DIR)/%.o)
+PRPS = $(SRCS:%.c=$(OBJ_DIR)/%.i)	# add preprocess files in /build
 
 # Compilation patterns
 $(OBJ_DIR)/%.o: %.c
@@ -33,6 +34,9 @@ $(OBJ_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
+
+$(OBJ_DIR)/%.i: %.c
+	@$(CC) $(CFLAGS) -E -o $@ $<
 
 $(OBJ_DIR)/%.o: %.cc
 	@echo + CXX $<
@@ -49,7 +53,7 @@ $(OBJ_DIR)/%.o: %.cc
 
 app: $(BINARY)
 
-$(BINARY): $(OBJS) $(ARCHIVES)
+$(BINARY): $(OBJS) $(ARCHIVES) $(PRPS)
 	@echo + LD $@
 	@$(LD) -o $@ $(OBJS) $(LDFLAGS) $(ARCHIVES) $(LIBS)
 

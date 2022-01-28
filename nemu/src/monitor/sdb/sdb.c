@@ -138,9 +138,6 @@ static int cmd_w(char *args)
 {
   int add_wp_state = add_wp(args);
   switch (add_wp_state) {
-  // case 1:
-  //   printf("[EXPR] is too long.\n");
-  //   break;
   case 2:
     printf("There is no available watchpoint in the pool.\n");
     break;

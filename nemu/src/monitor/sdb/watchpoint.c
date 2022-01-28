@@ -76,9 +76,6 @@ int add_wp(char* e)
   WP *wp;
   bool success = true;
   word_t old_val;
-  // if (strlen(e) > 127) {
-  //   return 1;
-  // }
 
   old_val = expr(e, &success);
   if (success == false) {
