@@ -3,7 +3,7 @@
 
 #define INSTR_LIST(f) \
   f(lui) f(auipc)\
-  f(lw) f(addi) \
+  f(lw) f(addi) f(jalr) \
   f(sw) \
   f(jal) \
   f(inv) f(nemu_trap)
