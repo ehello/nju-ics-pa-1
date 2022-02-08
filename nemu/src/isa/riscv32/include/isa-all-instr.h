@@ -5,6 +5,7 @@
   f(lui) f(auipc)\
   f(lw) f(addi) \
   f(sw) \
+  f(jal) \
   f(inv) f(nemu_trap)
 
 def_all_EXEC_ID();
