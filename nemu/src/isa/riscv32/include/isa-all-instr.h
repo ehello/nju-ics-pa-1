@@ -2,7 +2,7 @@
 #include "../local-include/rtl.h"
 
 #define INSTR_LIST(f) \
-  f(lui) \
+  f(lui) f(auipc)\
   f(lw) f(addi) \
   f(sw) \
   f(inv) f(nemu_trap)
